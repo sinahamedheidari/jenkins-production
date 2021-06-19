@@ -16,6 +16,14 @@ RUN apt-get update \
    && apt-get -y install docker-ce \
    && rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
 
+# Install ansible
+RUN set -ex \
+    && echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" >> /etc/apt/sources.list \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367 \
+    && apt-get update \
+    && apt-get -y install ansible \
+    && rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
+
 ARG user=jenkins
 ARG group=jenkins
 ARG uid=1000
@@ -40,7 +48,8 @@ RUN set -ex \
   && mkdir -p $JENKINS_HOME \
   && chown ${uid}:${gid} $JENKINS_HOME \
   && groupadd -g ${gid} ${group} \
-  && useradd -d "$JENKINS_HOME" -u ${uid} -g ${gid} -m -s /bin/bash ${user}
+  && useradd -d "$JENKINS_HOME" -u ${uid} -g ${gid} -m -s /bin/bash ${user} \
+  && usermod -a -G docker jenkins
 
 # Jenkins home directory is a volume, so configuration and build history
 # can be persisted and survive image upgrades
